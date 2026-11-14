@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mô Phỏng Thuật Toán Sinh Hoán Vị (Narayana) | Đề tài DT034 - INT13185</title>
+
+  <!-- Font chữ tối ưu hiển thị -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <script>
+    // Nhận diện theme không gây chớp nháy (Zero-flash theme initialization)
+    (function () {
+      try {
+        const saved = localStorage.getItem('perm_theme_choice') || 'system';
+        let eff = saved;
+        if (eff === 'system') {
+          eff = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', eff);
+      } catch (e) { }
+    })();
+  </script>
+
+  <style>
+    /* ==========================================================================
+       HỆ THỐNG BIẾN GIAO DIỆN HIỆN ĐẠI (DARK / LIGHT THEME)
+       ========================================================================== */
+    :root,
+    [data-theme="dark"] {
+      --bg-page: #0b0f19;
+      --bg-card: #111827;
+      --bg-card-subtle: #1a2234;
+      --bg-code: #070a12;
+      --border-main: #242f48;
+      --border-active: #3b82f6;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #64748b;
+
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.25);
+
+      --color-i: #f43f5e;
+      /* Màu chốt i */
+      --color-i-bg: rgba(244, 63, 94, 0.15);
+      --color-j: #06b6d4;
+      /* Màu phần tử thế j */
+      --color-j-bg: rgba(6, 182, 212, 0.15);
+      --color-swap: #f59e0b;
+      /* Màu hoán đổi */
+      --color-swap-bg: rgba(245, 158, 11, 0.18);
+      --color-rev: #10b981;
+      /* Màu lật ngược đoạn */
+      --color-rev-bg: rgba(16, 185, 129, 0.16);
+
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+      --font-code: 'JetBrains Mono', Consolas, Monaco, monospace;
+    }
+
+    [data-theme="light"] {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f1f5f9;
+      --bg-code: #0f172a;
+      --border-main: #e2e8f0;
+      --border-active: #2563eb;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.2);
+
+      --color-i: #e11d48;
+      --color-i-bg: rgba(225, 29, 72, 0.12);
+      --color-j: #0284c7;
+      --color-j-bg: rgba(2, 132, 199, 0.12);
+      --color-swap: #d97706;
+      --color-swap-bg: rgba(217, 119, 6, 0.15);
+      --color-rev: #059669;
+      --color-rev-bg: rgba(5, 150, 105, 0.14);
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
+      --font-code: 'JetBrains Mono', Consolas, Monaco, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 24px 20px 48px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       HEADER & THANH ĐIỀU HƯỚNG
+       ========================================================================== */
+    header.header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-main);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-title h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      background: linear-gradient(120deg, var(--text-main), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .theme-switcher {
+      display: inline-flex;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 3px;
+    }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .theme-btn:hover {
+      color: var(--text-main);
+    }
+
+    .theme-btn.active {
+      background: var(--bg-card);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #10b981;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.85);
+      }
+    }
+
+    /* ==========================================================================
+       BANNER THÔNG TIN ĐỊNH DANH SINH VIÊN CHÍNH QUY
+       ========================================================================== */
+    .student-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 22px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .student-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: linear-gradient(180deg, #3b82f6, #06b6d4);
+    }
+
+    .student-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      flex-shrink: 0;
+    }
+
+    .student-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .student-header-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .student-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .student-badge-role {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      letter-spacing: 0.04em;
+    }
+
+    .student-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px 20px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 0.86rem;
+    }
+
+    .meta-lbl {
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .meta-val {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .meta-val.highlight {
+      color: var(--accent);
+      font-family: var(--font-code);
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       THANH ĐIỀU HƯỚNG TAB: MÔ PHỎNG vs LÝ THUYẾT GIÁO TRÌNH
+       ========================================================================== */
+    .tab-navigation {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-main);
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: var(--bg-card-subtle);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: var(--accent);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .tab-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================================================
+       BỐ CỤC CHÍNH (MAIN LAYOUT) TAB MÔ PHỎNG
+       ========================================================================== */
+    .visualizer-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .visualizer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ==========================================================================
+       THANH ĐIỀU KHIỂN (CONTROLS BAR)
+       ========================================================================== */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      margin-bottom: 22px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ctrl-label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .input-n {
+      width: 60px;
+      padding: 7px 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: var(--font-code);
+      text-align: center;
+    }
+
+    .input-n:focus {
+      outline: none;
+      border-color: var(--border-active);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-subtle);
+      border-color: var(--border-active);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      color: #ffffff;
+    }
+
+    .btn-accent:hover {
+      opacity: 0.95;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .speed-slider {
+      width: 90px;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    /* ==========================================================================
+       SÂN KHẤU TRỰC QUAN MẢNG (STAGE VIEW)
+       ========================================================================== */
+    .stage-wrapper {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 14px;
+      padding: 36px 20px 28px;
+      margin-bottom: 22px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      overflow-x: auto;
+    }
+
+    /* Hàng con trỏ */
+    .pointers-row {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      width: 100%;
+      height: 38px;
+      margin-bottom: 6px;
+    }
+
+    .ptr-slot {
+      width: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ptr-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      font-family: var(--font-code);
+      text-transform: uppercase;
+      animation: popIn 0.2s ease-out;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: translateY(-6px) scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .ptr-badge-i {
+      background: var(--color-i);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(244, 63, 94, 0.4);
+    }
+
+    .ptr-badge-j {
+      background: var(--color-j);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Hàng thẻ phần tử mảng */
+    .array-row {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      width: 100%;
+    }
+
+    .elem-card {
+      width: 72px;
+      height: 88px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-main);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 4px 6px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .elem-val {
+      font-size: 1.85rem;
+      font-weight: 800;
+      font-family: var(--font-code);
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .elem-idx {
+      font-size: 0.68rem;
+      font-family: var(--font-code);
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    /* Các trạng thái vi bước của thẻ */
+    .elem-card.is-i {
+      border-color: var(--color-i);
+      background: var(--color-i-bg);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(244, 63, 94, 0.25);
+    }
+
+    .elem-card.is-i .elem-val {
+      color: var(--color-i);
+    }
+
+    .elem-card.is-j {
+      border-color: var(--color-j);
+      background: var(--color-j-bg);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 18px rgba(6, 182, 212, 0.25);
+    }
+
+    .elem-card.is-j .elem-val {
+      color: var(--color-j);
+    }
+
+    .elem-card.is-swap {
+      border-color: var(--color-swap);
+      background: var(--color-swap-bg);
+      animation: shakeCard 0.4s ease-in-out;
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    .elem-card.is-swap .elem-val {
+      color: var(--color-swap);
+    }
+
+    @keyframes shakeCard {
+
+      0%,
+      100% {
+        transform: scale(1) translateY(-4px);
+      }
+
+      50% {
+        transform: scale(1.08) translateY(-6px);
+      }
+    }
+
+    .elem-card.is-reverse {
+      border-color: var(--color-rev);
+      background: var(--color-rev-bg);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+    }
+
+    .elem-card.is-reverse .elem-val {
+      color: var(--color-rev);
+    }
+
+    /* Dải chỉ báo đảo ngược */
+    .rev-indicator {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      padding: 6px 16px;
+      background: var(--color-rev-bg);
+      border: 1px dashed var(--color-rev);
+      border-radius: 9999px;
+      color: var(--color-rev);
+      font-size: 0.8rem;
+      font-weight: 700;
+      animation: fadeIn 0.2s ease-in;
+    }
+
+    .rev-indicator.active {
+      display: inline-flex;
+    }
+
+    /* ==========================================================================
+       HỘP THUYẾT MINH & LIVE TRACE
+       ========================================================================== */
+    .explanation-box {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 22px;
+    }
+
+    .exp-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .exp-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .exp-desc code {
+      font-family: var(--font-code);
+      background: var(--bg-code);
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    /* Bảng số liệu thống kê */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 680px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      font-family: var(--font-code);
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    /* Live Trace Code Inspector */
+    .trace-panel {
+      background: var(--bg-code);
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .trace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-main);
+    }
+
+    .trace-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .trace-badge {
+      font-family: var(--font-code);
+      font-size: 0.74rem;
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .code-view {
+      padding: 14px 16px;
+      font-family: var(--font-code);
+      font-size: 0.84rem;
+      line-height: 1.6;
+      color: #94a3b8;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .code-line {
+      display: flex;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s ease;
+    }
+
+    .code-line.active {
+      background: rgba(59, 130, 246, 0.22);
+      color: #ffffff;
+      border-left: 3px solid #3b82f6;
+      font-weight: 600;
+    }
+
+    .line-no {
+      width: 32px;
+      color: #475569;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .line-content {
+      white-space: pre;
+    }
+
+    /* ==========================================================================
+       CỘT PHẢI: LỊCH SỬ CẤU HÌNH ĐÃ SINH
+       ========================================================================== */
+    .history-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border-main);
+    }
+
+    .history-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .history-count-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-family: var(--font-code);
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--accent);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-height: 580px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 8px;
+      font-family: var(--font-code);
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .history-item:hover {
+      border-color: var(--border-active);
+      transform: translateX(2px);
+    }
+
+    .history-item.current {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent);
+      color: #60a5fa;
+      font-weight: 700;
+    }
+
+    .item-no {
+      color: var(--text-dim);
+      font-size: 0.76rem;
+    }
+
+    .item-val {
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    /* ==========================================================================
+       TAB 2: GIÁO TRÌNH & ÔN TẬP LÝ THUYẾT (INT1306)
+       ========================================================================== */
+    .theory-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theory-card h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theory-card h3 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 20px 0 10px;
+    }
+
+    .theory-card p {
+      font-size: 0.94rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 12px;
+    }
+
+    .algo-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .step-card {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .step-card-num {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--text-dim);
+      opacity: 0.35;
+      font-family: var(--font-code);
+    }
+
+    .step-card h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .step-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    .code-preview-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border-main);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: var(--font-code);
+      font-size: 0.84rem;
+      color: #f1f5f9;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 14px 0;
+    }
+
+    /* Quiz cards */
+    .quiz-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .quiz-card {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .quiz-card h4 {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .quiz-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt {
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-main);
+      border-radius: 8px;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .quiz-opt:hover {
+      border-color: var(--border-active);
+    }
+
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #10b981;
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .quiz-opt.wrong {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+      font-weight: 700;
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 10px;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--text-muted);
+    }
+
+    .quiz-feedback.show {
+      display: block;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-main);
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <!-- Icon Permutation / Arrows -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>Mô Phỏng Thuật Toán Sinh Hoán Vị (Narayana)</h1>
+          <p>Học phần: Cấu trúc dữ liệu và giải thuật (INT13185) &bull; PTIT HCM</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Chuyển đổi giao diện -->
+        <div class="theme-switcher">
+          <button class="theme-btn active" data-theme="system" id="btnThemeSystem" title="Tự động theo hệ thống">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Hệ thống
+          </button>
+          <button class="theme-btn" data-theme="light" id="btnThemeLight" title="Giao diện sáng">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            Sáng
+          </button>
+          <button class="theme-btn" data-theme="dark" id="btnThemeDark" title="Giao diện tối">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            Tối
+          </button>
+        </div>
+
+        <div class="badge-tag">
+          <span class="badge-dot"></span>
+          Đề tài DT034 &bull; Báo cáo CKI
+        </div>
+      </div>
+    </header>
+
+    <!-- Thẻ Thông Tin Định Danh Sinh Viên Chính Quy -->
+    <section class="student-banner">
+      <div class="student-avatar" id="avatarText">NK</div>
+      <div class="student-body">
+        <div class="student-header-row">
+          <h2 class="student-name">Nguyễn Nam Khánh</h2>
+          <span class="student-badge-role">Sinh viên báo cáo</span>
+        </div>
+        <div class="student-meta-grid">
+          <div class="meta-item">
+            <span class="meta-lbl">MSSV:</span>
+            <span class="meta-val highlight">N24DCDT038</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-lbl">Lớp:</span>
+            <span class="meta-val highlight">D24CQDT01-N</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-lbl">Học phần:</span>
+            <span class="meta-val">Cấu trúc dữ liệu và giải thuật (INT13185) — Nhóm 3</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-lbl">Khoa / Ngành:</span>
+            <span class="meta-val">Khoa Kỹ thuật Điện tử 2 — Ngành Kỹ thuật Điện tử</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-lbl">Giảng viên hướng dẫn:</span>
+            <span class="meta-val">ThS. Hồ Nhựt Minh</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-lbl">Đề tài:</span>
+            <span class="meta-val">DT034 — Liệt kê hoán vị theo thứ tự từ điển</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thanh Điều Hướng Tab -->
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="tabVisualizer" id="tabBtnVisualizer">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3" />
+        </svg>
+        <span>1. Mô phỏng trực quan</span>
+        <span class="tab-badge">Visualizer</span>
+      </button>
+      <button class="tab-btn" data-tab="tabTheory" id="tabBtnTheory">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+        <span>2. Giáo trình &amp; Ôn tập</span>
+        <span class="tab-badge">Lý thuyết</span>
+      </button>
+    </nav>
+
+    <!-- ==========================================================================
+         TAB 1: MÔ PHỎNG TRỰC QUAN
+         ========================================================================== -->
+    <div class="tab-content active" id="tabVisualizer">
+      <div class="visualizer-grid">
+        <!-- Cột trái: Sân khấu trực quan và điều khiển -->
+        <main class="panel">
+          <!-- Thanh điều khiển -->
+          <div class="controls-bar">
+            <div class="ctrl-group">
+              <span class="ctrl-label">Số phần tử (n):</span>
+              <input type="number" id="inputN" class="input-n" min="2" max="6" value="4"
+                title="Chọn từ 2 đến 6 để trực quan tốt nhất">
+              <button id="btnReset" class="btn btn-secondary" title="Đặt lại về mảng ban đầu [1, 2, ..., n]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                Đặt lại
+              </button>
+            </div>
+
+            <div class="ctrl-group">
+              <button id="btnStep" class="btn btn-secondary"
+                title="Chạy từng vi bước (tìm i, tìm j, đổi chỗ, đảo ngược)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 4 15 12 5 20 5 4" />
+                  <line x1="19" y1="5" x2="19" y2="19" />
+                </svg>
+                Từng bước
+              </button>
+              <button id="btnNext" class="btn btn-accent" title="Sinh ngay 1 cấu hình hoàn chỉnh tiếp theo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 19 22 12 13 5 13 19" />
+                  <polygon points="2 19 11 12 2 5 2 19" />
+                </svg>
+                Cấu hình tiếp
+              </button>
+              <button id="btnAuto" class="btn btn-primary" title="Tự động phát liên tục">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Tự động chạy
+              </button>
+            </div>
+
+            <div class="ctrl-group">
+              <span class="ctrl-label">Tốc độ:</span>
+              <input type="range" id="speedRange" class="speed-slider" min="150" max="850" value="550"
+                title="Điều chỉnh tốc độ mô phỏng">
+              <span id="speedDisplay" class="ctrl-label" style="font-weight: 700; min-width: 28px;">1.0x</span>
+            </div>
+          </div>
+
+          <!-- Sân khấu hiển thị mảng -->
+          <div class="stage-wrapper">
+            <div class="pointers-row" id="pointersRow"></div>
+            <div class="array-row" id="arrayRow"></div>
+            <div class="rev-indicator" id="revIndicator">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M4 12h16m-7-7 7 7-7 7" />
+              </svg>
+              <span id="revIndicatorText">Đang đảo ngược đoạn [i+1 .. n-1]</span>
+            </div>
+          </div>
+
+          <!-- Hộp thuyết minh bước thuật toán -->
+          <div class="explanation-box">
+            <div class="exp-title" id="expTitle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <span id="expTitleText">Khởi tạo mảng</span>
+            </div>
+            <p class="exp-desc" id="expDesc">Đang chuẩn bị mô phỏng hoán vị kế tiếp...</p>
+          </div>
+
+          <!-- Bảng số liệu thống kê -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Cấu hình</div>
+              <div class="stat-value" id="statCur">1</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Tổng n!</div>
+              <div class="stat-value" id="statTotal">24</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Tiến độ</div>
+              <div class="stat-value" id="statPercent">4%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Trạng thái</div>
+              <div class="stat-value" id="statStatus" style="font-size: 0.95rem; color: var(--color-j);">Sẵn sàng</div>
+            </div>
+          </div>
+
+          <!-- Bảng theo dõi mã nguồn Python thời gian thực (Live Code Trace) -->
+          <div class="trace-panel">
+            <div class="trace-header">
+              <div class="trace-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6" />
+                  <polyline points="8 6 2 12 8 18" />
+                </svg>
+                Truy vết mã nguồn Python (test.py &bull; hoan_vi_tiep)
+              </div>
+              <span class="trace-badge" id="traceBadge">Dòng 24-25: Khởi tạo</span>
+            </div>
+            <div class="code-view" id="codeView">
+              <div class="code-line" id="L-11"><span class="line-no">11</span><span class="line-content">def dao_doan(a,
+                  l, r):</span></div>
+              <div class="code-line" id="L-12"><span class="line-no">12</span><span class="line-content"> while l &lt;
+                  r:</span></div>
+              <div class="code-line" id="L-13"><span class="line-no">13</span><span class="line-content"> a[l], a[r] =
+                  a[r], a[l]</span></div>
+              <div class="code-line" id="L-14"><span class="line-no">14</span><span class="line-content"> l += 1</span>
+              </div>
+              <div class="code-line" id="L-15"><span class="line-no">15</span><span class="line-content"> r -= 1</span>
+              </div>
+              <div class="code-line" id="L-19"><span class="line-no">19</span><span class="line-content">def
+                  hoan_vi_tiep(a):</span></div>
+              <div class="code-line" id="L-24"><span class="line-no">24</span><span class="line-content"> n =
+                  len(a)</span></div>
+              <div class="code-line" id="L-25"><span class="line-no">25</span><span class="line-content"> i = n -
+                  2</span></div>
+              <div class="code-line" id="L-27"><span class="line-no">27</span><span class="line-content"> # 1. Tìm i từ
+                  phải sang trái sao cho a[i] &lt; a[i+1]</span></div>
+              <div class="code-line" id="L-28"><span class="line-no">28</span><span class="line-content"> while i &gt;=
+                  0 and a[i] &gt;= a[i + 1]:</span></div>
+              <div class="code-line" id="L-29"><span class="line-no">29</span><span class="line-content"> i -= 1</span>
+              </div>
+              <div class="code-line" id="L-30"><span class="line-no">30</span><span class="line-content"> if i &lt;
+                  0:</span></div>
+              <div class="code-line" id="L-31"><span class="line-no">31</span><span class="line-content"> return False #
+                  Đã đến cấu hình giảm dần cuối cùng</span></div>
+              <div class="code-line" id="L-34"><span class="line-no">34</span><span class="line-content"> # 2. Tìm j từ
+                  phải sang trái sao cho a[j] &gt; a[i]</span></div>
+              <div class="code-line" id="L-35"><span class="line-no">35</span><span class="line-content"> j = n -
+                  1</span></div>
+              <div class="code-line" id="L-36"><span class="line-no">36</span><span class="line-content"> while a[j]
+                  &lt;= a[i]:</span></div>
+              <div class="code-line" id="L-37"><span class="line-no">37</span><span class="line-content"> j -= 1</span>
+              </div>
+              <div class="code-line" id="L-39"><span class="line-no">39</span><span class="line-content"> # 3. Đổi chỗ
+                  a[i] và a[j]</span></div>
+              <div class="code-line" id="L-40"><span class="line-no">40</span><span class="line-content"> a[i], a[j] =
+                  a[j], a[i]</span></div>
+              <div class="code-line" id="L-42"><span class="line-no">42</span><span class="line-content"> # 4. Đảo đoạn
+                  từ i+1 đến cuối mảng</span></div>
+              <div class="code-line" id="L-43"><span class="line-no">43</span><span class="line-content"> dao_doan(a, i
+                  + 1, n - 1)</span></div>
+              <div class="code-line" id="L-44"><span class="line-no">44</span><span class="line-content"> return
+                  True</span></div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Cột phải: Lịch sử các hoán vị đã sinh -->
+        <aside class="panel history-panel">
+          <div class="history-header">
+            <span class="history-title">Danh sách hoán vị</span>
+            <span class="history-count-badge" id="histCountBadge">1 cấu hình</span>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         TAB 2: GIÁO TRÌNH & ÔN TẬP LÝ THUYẾT (INT1306)
+         ========================================================================== -->
+    <div class="tab-content" id="tabTheory">
+      <div class="theory-card">
+        <h2>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          Lý Thuyết Thuật Toán Sinh Hoán Vị (Narayana)
+        </h2>
+        <p>Thuật toán sinh hoán vị kế tiếp theo thứ tự từ điển (Lexicographical Permutation Generation) được nhà toán
+          học Ấn Độ <b>Pandit Narayana</b> phát minh vào thế kỷ 14. Phương pháp này thao tác trực tiếp trên mảng với bộ
+          nhớ bổ sung là <code>O(1)</code>, không sử dụng đệ quy, thích hợp tối đa cho việc duyệt và xử lý tập hoán vị
+          quy mô $n \le 8$.</p>
+
+        <h3>Bốn Vi Bước Thực Thi Chuẩn Hóa</h3>
+        <div class="algo-steps">
+          <div class="step-card">
+            <div class="step-card-num">01</div>
+            <h4>Tìm chốt i</h4>
+            <p>Quét từ cuối mảng về đầu để tìm chỉ số <code>i</code> đầu tiên thỏa mãn <code>a[i] &lt; a[i+1]</code>.
+              Nếu không tìm thấy ($i &lt; 0$), mảng đã đạt cấu hình giảm dần cực đại $\rightarrow$ Dừng.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-card-num">02</div>
+            <h4>Tìm phần tử thế j</h4>
+            <p>Quét từ cuối mảng về tìm chỉ số <code>j</code> đầu tiên thỏa mãn <code>a[j] &gt; a[i]</code>. Do đoạn từ
+              $i+1$ về cuối đang giảm dần nên $a[j]$ là số nhỏ nhất trong đoạn này mà lớn hơn $a[i]$.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-card-num">03</div>
+            <h4>Đổi chỗ a[i] &harr; a[j]</h4>
+            <p>Thực hiện hoán đổi giá trị hai vị trí <code>a[i]</code> và <code>a[j]</code>. Sau bước này, giá trị tại
+              vị trí $i$ tăng nhẹ lên cấu hình từ điển kế tiếp.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-card-num">04</div>
+            <h4>Lật ngược đoạn đuôi</h4>
+            <p>Lật ngược (reverse) đoạn con từ chỉ số <code>i + 1</code> đến <code>n - 1</code> bằng hai con trỏ tại chỗ
+              để đưa đoạn đuôi từ giảm dần trở thành tăng dần (nhỏ nhất).</p>
+          </div>
+        </div>
+
+        <h3>Cài Đặt Python Hoàn Chỉnh (src/DeTai.py)</h3>
+        <div class="code-preview-block">
+          def dao_doan(a: list, l: int, r: int) -> None:
+          """Đảo ngược đoạn con a[l..r] tại chỗ."""
+          while l < r: a[l], a[r]=a[r], a[l] l +=1 r -=1 def hoan_vi_tiep(a: list) -> bool:
+            """Sinh hoán vị kế tiếp theo thứ tự từ điển trên mảng a."""
+            n = len(a)
+            i = n - 2
+            while i >= 0 and a[i] >= a[i + 1]:
+            i -= 1
+            if i < 0: return False j=n - 1 while a[j] <=a[i]: j -=1 a[i], a[j]=a[j], a[i] dao_doan(a, i + 1, n - 1)
+              return True </div>
+
+              <h3>Trắc Nghiệm Củng Cố Kiến Thức</h3>
+              <div class="quiz-container">
+                <div class="quiz-card">
+                  <h4>Câu 1: Cho mảng a = [1, 3, 5, 4, 2]. Chỉ số chốt i tìm được ở bước 1 là bao nhiêu?</h4>
+                  <div class="quiz-opts">
+                    <div class="quiz-opt" data-correct="false">A. i = 0 (a[i] = 1)</div>
+                    <div class="quiz-opt" data-correct="true">B. i = 1 (a[i] = 3 vì 3 &lt; 5)</div>
+                    <div class="quiz-opt" data-correct="false">C. i = 2 (a[i] = 5)</div>
+                    <div class="quiz-opt" data-correct="false">D. i = 3 (a[i] = 4)</div>
+                  </div>
+                  <div class="quiz-feedback">Chính xác! Duyệt từ đuôi: 2 &lt; 4 (giảm), 4 &lt; 5 (giảm), 5 &gt; 3 (tăng)
+                    $\rightarrow$ chỉ số $i = 1$ có $a[1] = 3 &lt; a[2] = 5$.</div>
+                </div>
+
+                <div class="quiz-card">
+                  <h4>Câu 2: Với mảng a = [1, 3, 5, 4, 2], hoán vị kế tiếp sinh ra là gì?</h4>
+                  <div class="quiz-opts">
+                    <div class="quiz-opt" data-correct="false">A. [1, 3, 5, 2, 4]</div>
+                    <div class="quiz-opt" data-correct="true">B. [1, 4, 2, 3, 5]</div>
+                    <div class="quiz-opt" data-correct="false">C. [1, 4, 5, 3, 2]</div>
+                    <div class="quiz-opt" data-correct="false">D. [1, 5, 4, 3, 2]</div>
+                  </div>
+                  <div class="quiz-feedback">Chính xác! $i=1 (3)$, tìm $j=3 (4)$, đổi chỗ thành $[1, 4, 5, 3, 2]$, đảo
+                    ngược đuôi $[5, 3, 2]$ thành $[2, 3, 5] \rightarrow [1, 4, 2, 3, 5]$.</div>
+                </div>
+              </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        Báo Cáo Cuối Kỳ Môn Cấu Trúc Dữ Liệu &amp; Giải Thuật (INT13185) &bull; Sinh viên: Nguyễn Nam Khánh (MSSV:
+        N24DCDT038) &bull; PTIT HCM 2026
+      </footer>
+    </div>
+
+    <!-- ==========================================================================
+       JAVASCRIPT LOGIC TRỰC QUAN MÔ PHỎNG (ZERO-ERROR)
+       ========================================================================== -->
+    <script>
+      // --- Các pha vi bước của thuật toán ---
+      const PHASES = {
+        READY: 'READY',
+        SCAN_I: 'SCAN_I',
+        FOUND_I: 'FOUND_I',
+        SCAN_J: 'SCAN_J',
+        FOUND_J: 'FOUND_J',
+        SWAPPING: 'SWAPPING',
+        REVERSING: 'REVERSING',
+        DONE_PERM: 'DONE_PERM',
+        FINISHED: 'FINISHED'
+      };
+
+      // Ánh xạ dòng code tương ứng trong Python để highlight
+      const CODE_MAP = {
+        READY: [24, 25],
+        SCAN_I: [27, 28],
+        FOUND_I: [30],
+        SCAN_J: [34, 35, 36],
+        FOUND_J: [39],
+        SWAPPING: [39, 40],
+        REVERSING: [42, 43, 11, 12, 13, 14, 15],
+        DONE_PERM: [44],
+        FINISHED: [30, 31]
+      };
+
+      // --- Quản lý giao diện Sáng / Tối ---
+      class ThemeController {
+        constructor() {
+          this.currentMode = localStorage.getItem('perm_theme_choice') || 'system';
+          this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          this.buttons = {
+            system: document.getElementById('btnThemeSystem'),
+            light: document.getElementById('btnThemeLight'),
+            dark: document.getElementById('btnThemeDark')
+          };
+          this.init();
+        }
+
+        init() {
+          this.apply(this.currentMode);
+          this.mediaQuery.addEventListener('change', () => {
+            if (this.currentMode === 'system') this.updateDom('system');
+          });
+          Object.keys(this.buttons).forEach(mode => {
+            if (this.buttons[mode]) {
+              this.buttons[mode].addEventListener('click', () => this.setMode(mode));
+            }
+          });
+        }
+
+        setMode(mode) {
+          this.currentMode = mode;
+          localStorage.setItem('perm_theme_choice', mode);
+          this.apply(mode);
+        }
+
+        apply(mode) {
+          this.updateDom(mode);
+          Object.keys(this.buttons).forEach(k => {
+            if (this.buttons[k]) this.buttons[k].classList.toggle('active', k === mode);
+          });
+        }
+
+        updateDom(mode) {
+          let eff = mode;
+          if (mode === 'system') {
+            eff = this.mediaQuery.matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', eff);
+        }
+      }
+
+      // --- Bộ mô phỏng thuật toán hoán vị ---
+      class PermutationVisualizer {
+        constructor() {
+          this.n = 4;
+          this.arr = [];
+          this.history = [];
+          this.currentPermIndex = 1;
+          this.totalPerms = 24;
+
+          this.phase = PHASES.READY;
+          this.i = -1;
+          this.j = -1;
+          this.scanI = -1;
+          this.scanJ = -1;
+
+          this.isPlaying = false;
+          this.timer = null;
+          this.speed = 450; // ms per step
+
+          this.dom = {
+            inputN: document.getElementById('inputN'),
+            btnReset: document.getElementById('btnReset'),
+            btnStep: document.getElementById('btnStep'),
+            btnNext: document.getElementById('btnNext'),
+            btnAuto: document.getElementById('btnAuto'),
+            speedRange: document.getElementById('speedRange'),
+            speedDisplay: document.getElementById('speedDisplay'),
+            pointersRow: document.getElementById('pointersRow'),
+            arrayRow: document.getElementById('arrayRow'),
+            revIndicator: document.getElementById('revIndicator'),
+            revIndicatorText: document.getElementById('revIndicatorText'),
+            expTitleText: document.getElementById('expTitleText'),
+            expDesc: document.getElementById('expDesc'),
+            statCur: document.getElementById('statCur'),
+            statTotal: document.getElementById('statTotal'),
+            statPercent: document.getElementById('statPercent'),
+            statStatus: document.getElementById('statStatus'),
+            traceBadge: document.getElementById('traceBadge'),
+            historyList: document.getElementById('historyList'),
+            histCountBadge: document.getElementById('histCountBadge')
+          };
+
+          this.initEvents();
+          this.reset();
+        }
+
+        factorial(num) {
+          let r = 1;
+          for (let k = 2; k <= num; k++) r *= k;
+          return r;
+        }
+
+        initEvents() {
+          this.dom.inputN.addEventListener('change', (e) => {
+            let v = parseInt(e.target.value);
+            if (isNaN(v) || v < 2) v = 2;
+            if (v > 6) {
+              alert('Để giao diện trực quan và mượt mà nhất, hãy chọn n từ 2 đến 6 (với n=6 có 720 hoán vị).');
+              v = 6;
+            }
+            this.dom.inputN.value = v;
+            this.n = v;
+            this.reset();
+          });
+
+          this.dom.btnReset.addEventListener('click', () => {
+            this.pause();
+            this.reset();
+          });
+
+          this.dom.btnStep.addEventListener('click', () => {
+            this.pause();
+            this.step();
+          });
+
+          this.dom.btnNext.addEventListener('click', () => {
+            this.pause();
+            this.nextFullPerm();
+          });
+
+          this.dom.btnAuto.addEventListener('click', () => {
+            if (this.isPlaying) this.pause();
+            else this.play();
+          });
+
+          this.dom.speedRange.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            this.speed = 1000 - val;
+            const rate = (val / 550).toFixed(1);
+            this.dom.speedDisplay.textContent = `${rate}x`;
+            if (this.isPlaying) {
+              this.pause();
+              this.play();
+            }
+          });
+        }
+
+        reset() {
+          this.arr = Array.from({ length: this.n }, (_, i) => i + 1);
+          this.history = [[...this.arr]];
+          this.currentPermIndex = 1;
+          this.totalPerms = this.factorial(this.n);
+
+          this.phase = PHASES.READY;
+          this.i = this.n - 2;
+          this.j = this.n - 1;
+          this.scanI = this.n - 2;
+          this.scanJ = this.n - 1;
+
+          this.updateStats();
+          this.renderArray();
+          this.renderHistory();
+          this.highlightCode(CODE_MAP.READY);
+          this.updateExplanation(
+            'Khởi tạo cấu hình ban đầu',
+            `Mảng được khởi tạo tăng dần nhỏ nhất: <code>[${this.arr.join(', ')}]</code>. Bấm <b>Từng bước</b> hoặc <b>Tự động chạy</b> để bắt đầu sinh hoán vị tiếp theo.`
+          );
+          this.dom.traceBadge.textContent = 'Dòng 24-25: Khởi tạo';
+        }
+
+        updateStats() {
+          this.dom.statCur.textContent = this.currentPermIndex;
+          this.dom.statTotal.textContent = this.totalPerms;
+          this.dom.statPercent.textContent = `${Math.round((this.currentPermIndex / this.totalPerms) * 100)}%`;
+          this.dom.statStatus.textContent = this.getPhaseText();
+          this.dom.histCountBadge.textContent = `${this.history.length} cấu hình`;
+        }
+
+        getPhaseText() {
+          switch (this.phase) {
+            case PHASES.READY: return 'Sẵn sàng';
+            case PHASES.SCAN_I: return 'Tìm chốt i';
+            case PHASES.FOUND_I: return 'Đã tìm thấy i';
+            case PHASES.SCAN_J: return 'Tìm phần tử thế j';
+            case PHASES.FOUND_J: return 'Đã tìm thấy j';
+            case PHASES.SWAPPING: return 'Đổi chỗ a[i] ↔ a[j]';
+            case PHASES.REVERSING: return 'Đảo đoạn đuôi';
+            case PHASES.DONE_PERM: return 'Hoàn thành cấu hình';
+            case PHASES.FINISHED: return 'Đã duyệt hết (Cực đại)';
+            default: return 'Đang xử lý';
+          }
+        }
+
+        renderArray() {
+          this.dom.arrayRow.innerHTML = '';
+          this.dom.pointersRow.innerHTML = '';
+
+          this.arr.forEach((val, idx) => {
+            // Pointer Slot
+            const ptr = document.createElement('div');
+            ptr.className = 'ptr-slot';
+            if (this.phase === PHASES.SCAN_I && idx === this.scanI) {
+              ptr.innerHTML = `<span class="ptr-badge ptr-badge-i">i?</span>`;
+            } else if (idx === this.i && [PHASES.FOUND_I, PHASES.SCAN_J, PHASES.FOUND_J, PHASES.SWAPPING].includes(this.phase)) {
+              ptr.innerHTML = `<span class="ptr-badge ptr-badge-i">i = ${this.i}</span>`;
+            } else if (this.phase === PHASES.SCAN_J && idx === this.scanJ) {
+              ptr.innerHTML = `<span class="ptr-badge ptr-badge-j">j?</span>`;
+            } else if (idx === this.j && [PHASES.FOUND_J, PHASES.SWAPPING].includes(this.phase)) {
+              ptr.innerHTML = `<span class="ptr-badge ptr-badge-j">j = ${this.j}</span>`;
+            }
+            this.dom.pointersRow.appendChild(ptr);
+
+            // Card Slot
+            const card = document.createElement('div');
+            card.className = 'elem-card';
+            if (idx === this.i && [PHASES.FOUND_I, PHASES.SCAN_J, PHASES.FOUND_J].includes(this.phase)) {
+              card.classList.add('is-i');
+            }
+            if (idx === this.j && [PHASES.FOUND_J].includes(this.phase)) {
+              card.classList.add('is-j');
+            }
+            if ((idx === this.i || idx === this.j) && this.phase === PHASES.SWAPPING) {
+              card.classList.add('is-swap');
+            }
+            if (this.phase === PHASES.REVERSING && idx > this.i) {
+              card.classList.add('is-reverse');
+            }
+
+            card.innerHTML = `
+            <div class="elem-val">${val}</div>
+            <div class="elem-idx">idx: ${idx}</div>
+          `;
+            this.dom.arrayRow.appendChild(card);
+          });
+
+          // Chỉ báo đảo đoạn
+          if (this.phase === PHASES.REVERSING && this.i + 1 < this.n) {
+            this.dom.revIndicator.classList.add('active');
+            this.dom.revIndicatorText.textContent = `Đang đảo ngược đoạn [i+1 .. n-1] = [${this.i + 1} .. ${this.n - 1}]`;
+          } else {
+            this.dom.revIndicator.classList.remove('active');
+          }
+        }
+
+        renderHistory() {
+          this.dom.historyList.innerHTML = '';
+          this.history.forEach((perm, idx) => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            if (idx + 1 === this.currentPermIndex) item.classList.add('current');
+            item.innerHTML = `
+            <span class="item-no">#${idx + 1}</span>
+            <span class="item-val">[${perm.join(', ')}]</span>
+          `;
+            item.addEventListener('click', () => {
+              this.pause();
+              this.jumpTo(idx);
+            });
+            this.dom.historyList.appendChild(item);
+          });
+
+          const cur = this.dom.historyList.querySelector('.history-item.current');
+          if (cur) cur.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        jumpTo(idx) {
+          this.arr = [...this.history[idx]];
+          this.currentPermIndex = idx + 1;
+          this.phase = PHASES.READY;
+          this.updateStats();
+          this.renderArray();
+          this.renderHistory();
+          this.highlightCode(CODE_MAP.READY);
+          this.updateExplanation(
+            `Xem cấu hình #${this.currentPermIndex}`,
+            `Cấu hình hiện tại: <code>[${this.arr.join(', ')}]</code>. Bấm <b>Từng bước</b> để theo dõi quá trình sinh tiếp theo từ đây.`
+          );
+        }
+
+        updateExplanation(title, desc) {
+          this.dom.expTitleText.textContent = title;
+          this.dom.expDesc.innerHTML = desc;
+        }
+
+        highlightCode(lines) {
+          document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+          if (!lines || !lines.length) return;
+          let first = null;
+          lines.forEach(num => {
+            const el = document.getElementById(`L-${num}`);
+            if (el) {
+              el.classList.add('active');
+              if (!first) first = el;
+            }
+          });
+          if (first) first.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // --- Máy trạng thái vi bước ---
+        step() {
+          if (this.phase === PHASES.FINISHED) {
+            this.updateExplanation(
+              'Thuật toán kết thúc!',
+              `Đã duyệt toàn bộ <code>${this.totalPerms}</code> hoán vị. Cấu hình <code>[${this.arr.join(', ')}]</code> là cực đại giảm dần. Bấm <b>Đặt lại</b> để xem lại.`
+            );
+            this.pause();
+            return;
+          }
+
+          switch (this.phase) {
+            case PHASES.READY:
+            case PHASES.DONE_PERM: {
+              this.scanI = this.n - 2;
+              this.phase = PHASES.SCAN_I;
+              this.highlightCode(CODE_MAP.SCAN_I);
+              this.dom.traceBadge.textContent = 'Dòng 27-28: while a[i] >= a[i+1]';
+              this.updateExplanation(
+                'Bước 1: Quét tìm chỉ số chốt i',
+                `Bắt đầu quét từ vị trí <code>i = ${this.scanI}</code> về đầu mảng để tìm vị trí đầu tiên có <code>a[i] < a[i + 1]</code>.`
+              );
+              this.renderArray();
+              break;
+            }
+
+            case PHASES.SCAN_I: {
+              if (this.scanI >= 0 && this.arr[this.scanI] >= this.arr[this.scanI + 1]) {
+                this.updateExplanation(
+                  `Kiểm tra tại i = ${this.scanI}`,
+                  `Do <code>a[${this.scanI}] = ${this.arr[this.scanI]} ≥ a[${this.scanI + 1}] = ${this.arr[this.scanI + 1]}</code>, đoạn đuôi vẫn giảm dần $\\rightarrow$ tiếp tục lùi sang trái <code>i -= 1</code>.`
+                );
+                this.scanI--;
+                this.renderArray();
+              } else {
+                this.i = this.scanI;
+                if (this.i < 0) {
+                  this.phase = PHASES.FINISHED;
+                  this.highlightCode(CODE_MAP.FINISHED);
+                  this.dom.traceBadge.textContent = 'Dòng 30-31: if i < 0: return False';
+                  this.updateExplanation(
+                    'Cấu hình cuối cùng!',
+                    `Chỉ số <code>i = -1 < 0</code>: Toàn bộ mảng đã theo thứ tự giảm dần <code>[${this.arr.join(', ')}]</code>. Hoàn tất sinh toàn bộ $n!$ hoán vị.`
+                  );
+                  this.renderArray();
+                  this.pause();
+                } else {
+                  this.phase = PHASES.FOUND_I;
+                  this.highlightCode(CODE_MAP.FOUND_I);
+                  this.dom.traceBadge.textContent = `Dòng 30: Đã tìm thấy chốt i = ${this.i}`;
+                  this.updateExplanation(
+                    `Bước 1 thành công: Tìm thấy chốt i = ${this.i}`,
+                    `Thỏa mãn <code>a[${this.i}] = ${this.arr[this.i]} < a[${this.i + 1}] = ${this.arr[this.i + 1]}</code>. Cố định <b>i = ${this.i}</b>.`
+                  );
+                  this.renderArray();
+                }
+              }
+              break;
+            }
+
+            case PHASES.FOUND_I: {
+              this.scanJ = this.n - 1;
+              this.phase = PHASES.SCAN_J;
+              this.highlightCode(CODE_MAP.SCAN_J);
+              this.dom.traceBadge.textContent = 'Dòng 34-36: while a[j] <= a[i]';
+              this.updateExplanation(
+                'Bước 2: Quét tìm phần tử thế j',
+                `Bắt đầu quét từ cuối mảng <code>j = ${this.scanJ}</code> về tìm phần tử đầu tiên thỏa mãn <code>a[j] > a[i] = ${this.arr[this.i]}</code>.`
+              );
+              this.renderArray();
+              break;
+            }
+
+            case PHASES.SCAN_J: {
+              if (this.arr[this.scanJ] <= this.arr[this.i]) {
+                this.updateExplanation(
+                  `Kiểm tra tại j = ${this.scanJ}`,
+                  `Do <code>a[${this.scanJ}] = ${this.arr[this.scanJ]} ≤ a[${this.i}] = ${this.arr[this.i]}</code> $\\rightarrow$ tiếp tục lùi sang trái <code>j -= 1</code>.`
+                );
+                this.scanJ--;
+                this.renderArray();
+              } else {
+                this.j = this.scanJ;
+                this.phase = PHASES.FOUND_J;
+                this.highlightCode(CODE_MAP.FOUND_J);
+                this.dom.traceBadge.textContent = `Dòng 38: Tìm thấy thế j = ${this.j}`;
+                this.updateExplanation(
+                  `Bước 2 thành công: Tìm thấy phần tử thế j = ${this.j}`,
+                  `Thỏa mãn <code>a[${this.j}] = ${this.arr[this.j]} > a[${this.i}] = ${this.arr[this.i]}</code>. Chuẩn bị đổi chỗ.`
+                );
+                this.renderArray();
+              }
+              break;
+            }
+
+            case PHASES.FOUND_J: {
+              this.phase = PHASES.SWAPPING;
+              this.highlightCode(CODE_MAP.SWAPPING);
+              this.dom.traceBadge.textContent = `Dòng 39-40: a[${this.i}], a[${this.j}] = a[${this.j}], a[${this.i}]`;
+              this.updateExplanation(
+                'Bước 3: Đổi chỗ a[i] và a[j]',
+                `Thực hiện hoán vị hai giá trị <code>a[${this.i}] (${this.arr[this.i]})</code> &harr; <code>a[${this.j}] (${this.arr[this.j]})</code>.`
+              );
+              this.renderArray();
+              break;
+            }
+
+            case PHASES.SWAPPING: {
+              const temp = this.arr[this.i];
+              this.arr[this.i] = this.arr[this.j];
+              this.arr[this.j] = temp;
+
+              this.phase = PHASES.REVERSING;
+              this.highlightCode(CODE_MAP.REVERSING);
+              this.dom.traceBadge.textContent = `Dòng 42-43: dao_doan(a, ${this.i + 1}, ${this.n - 1})`;
+              this.updateExplanation(
+                'Bước 4: Đảo ngược đoạn đuôi từ i+1 đến n-1',
+                `Đã đổi chỗ xong <code>${temp} &harr; ${this.arr[this.i]}</code>. Hiện đoạn từ vị trí <code>${this.i + 1}</code> đến <code>${this.n - 1}</code> đang giảm dần, ta lật ngược lại thành tăng dần nhỏ nhất.`
+              );
+              this.renderArray();
+              break;
+            }
+
+            case PHASES.REVERSING: {
+              let l = this.i + 1;
+              let r = this.n - 1;
+              while (l < r) {
+                const t = this.arr[l];
+                this.arr[l] = this.arr[r];
+                this.arr[r] = t;
+                l++;
+                r--;
+              }
+
+              this.currentPermIndex++;
+              this.history.push([...this.arr]);
+              this.phase = PHASES.DONE_PERM;
+              this.highlightCode(CODE_MAP.DONE_PERM);
+              this.dom.traceBadge.textContent = 'Dòng 44: return True';
+              this.updateStats();
+              this.updateExplanation(
+                `Hoàn thành cấu hình #${this.currentPermIndex}`,
+                `Sinh thành công hoán vị kế tiếp: <code>[${this.arr.join(', ')}]</code>. Đã lưu vào lịch sử danh sách.`
+              );
+              this.renderArray();
+              this.renderHistory();
+              break;
+            }
+          }
+        }
+
+        nextFullPerm() {
+          if (this.phase === PHASES.FINISHED) return;
+          do {
+            this.step();
+          } while (this.phase !== PHASES.DONE_PERM && this.phase !== PHASES.FINISHED);
+        }
+
+        play() {
+          if (this.isPlaying) return;
+          this.isPlaying = true;
+          this.dom.btnAuto.classList.remove('btn-primary');
+          this.dom.btnAuto.classList.add('btn-danger');
+          this.dom.btnAuto.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+          Tạm dừng
+        `;
+
+          this.timer = setInterval(() => {
+            if (this.phase === PHASES.FINISHED) {
+              this.pause();
+              return;
+            }
+            this.step();
+          }, this.speed);
+        }
+
+        pause() {
+          this.isPlaying = false;
+          if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+          }
+          this.dom.btnAuto.classList.remove('btn-danger');
+          this.dom.btnAuto.classList.add('btn-primary');
+          this.dom.btnAuto.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Tự động chạy
+        `;
+        }
+      }
+
+      // --- Tab Navigation & Quiz Handlers ---
+      function initTabsAndQuiz() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabVisualizer = document.getElementById('tabVisualizer');
+        const tabTheory = document.getElementById('tabTheory');
+
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (target === 'tabVisualizer') {
+              tabVisualizer.classList.add('active');
+              tabTheory.classList.remove('active');
+            } else {
+              tabTheory.classList.add('active');
+              tabVisualizer.classList.remove('active');
+              if (window.vis && window.vis.isPlaying) window.vis.pause();
+            }
+          });
+        });
+
+        // Quiz options
+        document.querySelectorAll('.quiz-card').forEach(card => {
+          const opts = card.querySelectorAll('.quiz-opt');
+          const fb = card.querySelector('.quiz-feedback');
+          opts.forEach(opt => {
+            opt.addEventListener('click', () => {
+              opts.forEach(o => {
+                o.classList.remove('correct', 'wrong');
+                o.style.pointerEvents = 'none';
+              });
+              const isCorrect = opt.getAttribute('data-correct') === 'true';
+              if (isCorrect) opt.classList.add('correct');
+              else {
+                opt.classList.add('wrong');
+                opts.forEach(o => {
+                  if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+                });
+              }
+              if (fb) fb.classList.add('show');
+            });
+          });
+        });
+      }
+
+      // Khởi tạo ứng dụng khi DOM sẵn sàng
+      document.addEventListener('DOMContentLoaded', () => {
+        window.themeCtrl = new ThemeController();
+        window.vis = new PermutationVisualizer();
+        initTabsAndQuiz();
+      });
+    </script>
+</body>
+
+</html>
