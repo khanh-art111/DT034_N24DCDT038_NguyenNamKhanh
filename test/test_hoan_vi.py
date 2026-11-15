@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 # ============================================================
 #  ĐỀ TÀI : DT034 - Liệt kê hoán vị theo phương pháp sinh
-#  BỘ KIỂM THỬ : 12 ca độc lập
+#  BỘ KIỂM THỬ : 13 ca kiểm thử (Bao gồm 5 ca cần kiểm tra)
 # ============================================================
 
 # Đảm bảo tìm được thư mục gốc Bao_cao_CKI dù chạy từ đâu
@@ -40,24 +40,56 @@ def _quiet(n):
         return liet_ke_hoan_vi(n)
 
 
+def _sinh_tat_ca_cau_hinh(n):
+    """Sinh toàn bộ các cấu hình từ [1, ..., n] bằng hoan_vi_tiep."""
+    a = list(range(1, n + 1))
+    configs = [a.copy()]
+    while hoan_vi_tiep(a):
+        configs.append(a.copy())
+    return configs
+
+
 # ════════════════════════════════════════════════════════════
 class TestHoanVi(unittest.TestCase):
 
-    # ── NHÓM 1: CA VÍ DỤ TRÊN PHIẾU ──────────────────────
+    # ── NHÓM 1: CA VÍ DỤ TRÊN PHIẾU / YÊU CẦU ─────────────
 
     def test_vd01_n_bang_2(self):
-        """VD01 – n=2: sinh đúng 2 cấu hình, cấu hình cuối [2,1]."""
-        result = _quiet(2)
+        """VD01 [Ca 1] – n=2: thứ tự phải là [1, 2] rồi [2, 1]."""
+        # 1. Kiểm tra thứ tự cấu hình sinh ra bằng hoan_vi_tiep
+        configs = _sinh_tat_ca_cau_hinh(2)
+        self.assertEqual(configs, [[1, 2], [2, 1]])
+
+        # 2. Kiểm tra qua hàm tổng hợp liet_ke_hoan_vi
+        with patch('sys.stdout', new_callable=StringIO) as fake_out:
+            result = liet_ke_hoan_vi(2)
+            out = fake_out.getvalue()
+
         self.assertEqual(result["tong_so_cau_hinh"], 2)
         self.assertEqual(result["cau_hinh_cuoi"], [2, 1])
+        # Đảm bảo in đúng thứ tự [1, 2] trước rồi đến [2, 1]
+        pos1 = out.find("[1, 2]")
+        pos2 = out.find("[2, 1]")
+        self.assertTrue(pos1 != -1 and pos2 != -1 and pos1 < pos2)
 
     def test_vd02_n_bang_4(self):
-        """VD02 – n=4: sinh đúng 24 cấu hình, cấu hình cuối [4,3,2,1]."""
+        """VD02 [Ca 2] – n=4: có đúng 24 cấu hình, mỗi cấu hình đủ bốn số."""
+        configs = _sinh_tat_ca_cau_hinh(4)
+
+        # Có đúng 24 cấu hình (4! = 24)
+        self.assertEqual(len(configs), 24)
+
+        # Mỗi cấu hình đủ bốn số từ 1 đến 4, không trùng lặp
+        for cfg in configs:
+            self.assertEqual(len(cfg), 4, f"Cấu hình {cfg} không đủ 4 số.")
+            self.assertEqual(sorted(cfg), [1, 2, 3, 4], f"Cấu hình {cfg} không đủ bộ số [1, 2, 3, 4].")
+
+        # Kiểm tra qua hàm tổng hợp liet_ke_hoan_vi
         result = _quiet(4)
         self.assertEqual(result["tong_so_cau_hinh"], 24)
         self.assertEqual(result["cau_hinh_cuoi"], [4, 3, 2, 1])
 
-    # ── NHÓM 2: CA TỰ THIẾT KẾ ───────────────────────────
+    # ── NHÓM 2: CA TỰ THIẾT KẾ & TRUY VẾT ─────────────────
 
     def test_tk01_n_bang_3(self):
         """TK01 – n=3: sinh đúng 6 cấu hình."""
@@ -65,12 +97,20 @@ class TestHoanVi(unittest.TestCase):
         self.assertEqual(result["tong_so_cau_hinh"], 6)
 
     def test_tk02_truy_vet_mang(self):
-        """TK02 – Truy vết [1,3,5,4,2]: kết quả kế tiếp phải là [1,4,2,3,5]."""
+        """TK02 [Ca 5] – a=[1, 3, 5, 4, 2]: kết quả đúng ví dụ hình trong sách ([1, 4, 2, 3, 5])."""
         a = [1, 3, 5, 4, 2]
         kiem_tra_mang(a)
         success = hoan_vi_tiep(a)
         self.assertTrue(success)
         self.assertEqual(a, [1, 4, 2, 3, 5])
+
+    def test_tk03_cau_hinh_sau_132(self):
+        """TK03 [Ca 3] – a=[1, 3, 2]: cấu hình sau là [2, 1, 3]."""
+        a = [1, 3, 2]
+        kiem_tra_mang(a)
+        success = hoan_vi_tiep(a)
+        self.assertTrue(success)
+        self.assertEqual(a, [2, 1, 3])
 
     # ── NHÓM 3: CA BIÊN ───────────────────────────────────
 
@@ -86,12 +126,16 @@ class TestHoanVi(unittest.TestCase):
         self.assertEqual(result["tong_so_cau_hinh"], 40320)
 
     def test_bien03_cau_hinh_cuoi(self):
-        """BIEN03 – Mảng suy biến [3,2,1]: không sinh được, giữ nguyên."""
+        """BIEN03 [Ca 4] – a=[3, 2, 1]: báo hết, không quay vòng sang [1, 2, 3]."""
         a = [3, 2, 1]
         kiem_tra_mang(a)
         success = hoan_vi_tiep(a)
+        # Báo hết (không thể sinh tiếp)
         self.assertFalse(success)
+        # Mảng giữ nguyên cấu hình cuối [3, 2, 1]
         self.assertEqual(a, [3, 2, 1])
+        # Không quay vòng sang [1, 2, 3]
+        self.assertNotEqual(a, [1, 2, 3])
 
     # ── NHÓM 4: CA LỖI (INPUT KHÔNG HỢP LỆ) ─────────────
 
@@ -123,8 +167,8 @@ class TestHoanVi(unittest.TestCase):
 
 # ════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    print("=" * 55)
-    print("  ĐỀ TÀI : DT034")
-    print("  BỘ KIỂM THỬ : 12 ca độc lập")
-    print("=" * 55)
+    print("=" * 60)
+    print("  ĐỀ TÀI : DT034 - Liệt kê hoán vị theo phương pháp sinh")
+    print("  BỘ KIỂM THỬ : 13 ca (Gồm 5 ca yêu cầu & 8 ca mở rộng)")
+    print("=" * 60)
     unittest.main(verbosity=2)
